@@ -1,0 +1,2 @@
+# TracCategorizedFieldsPlugin
+TracCategorizedFieldsPlugin
