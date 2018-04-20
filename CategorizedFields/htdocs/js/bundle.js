@@ -411,11 +411,13 @@ module.exports = function normalizeComponent (
 //
 //
 //
+//
 
 module.exports = {
     props: ['categories', 'ticket'],
     created: function () {
         this.element = $("#ticket1");
+        this.description = $(".description");
         for (catindex in this.categories) {
             this.categories[catindex].fields.forEach(fieldName => {
                 var header = this.element.find('th#h_' + fieldName);
@@ -436,6 +438,7 @@ module.exports = {
             headers: {},
             fields: {},
             element: null,
+            description: null,
         };
     },
     methods: {
@@ -485,6 +488,9 @@ module.exports = {
         },
         getHtml: function (element) {
             return element ? element.html() : '';
+        },
+        getDescription: function () {
+            return this.description.wrap('<p/>').parent().html();
         }
     }
 }
@@ -11974,7 +11980,9 @@ var render = function() {
             )
           ]
         )
-      })
+      }),
+      _vm._v(" "),
+      _c("div", { domProps: { innerHTML: _vm._s(_vm.getDescription()) } })
     ],
     2
   )

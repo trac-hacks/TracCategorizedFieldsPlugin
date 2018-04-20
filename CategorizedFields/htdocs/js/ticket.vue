@@ -14,6 +14,7 @@
                 </tbody>
             </table>
         </div>
+        <div v-html="getDescription()"></div>
     </div>
 </template>
 <script>
@@ -21,6 +22,7 @@
         props: ['categories', 'ticket'],
         created: function () {
             this.element = $("#ticket1");
+            this.description = $(".description");
             for (catindex in this.categories) {
                 this.categories[catindex].fields.forEach(fieldName => {
                     var header = this.element.find('th#h_' + fieldName);
@@ -41,6 +43,7 @@
                 headers: {},
                 fields: {},
                 element: null,
+                description: null,
             };
         },
         methods: {
@@ -90,6 +93,9 @@
             },
             getHtml: function (element) {
                 return element ? element.html() : '';
+            },
+            getDescription: function () {
+                return this.description.wrap('<p/>').parent().html();
             }
         }
     }
