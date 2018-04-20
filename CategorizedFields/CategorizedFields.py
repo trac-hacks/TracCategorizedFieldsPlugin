@@ -27,23 +27,20 @@ import pkg_resources
 class CategorizedFields(Component):
     implements(ITemplateStreamFilter, ITemplateProvider)
 
-
-    #ITemplateProvider methods
+    # ITemplateProvider methods
     def get_htdocs_dirs(self):
         return [('CategorizedFields', pkg_resources.resource_filename('CategorizedFields', 'htdocs'))]
 
     def get_templates_dirs(self):
         return []
 
-    ## ITemplateStreamFilter
-
+    # ITemplateStreamFilter
     def filter_stream(self, req, method, filename, stream, data):
 
         if filename != "ticket.html" and filename != 'ticket_preview.html':
             return stream
 
         if 'ticket' in data:
-
 
             add_script(req, 'CategorizedFields/js/bundle.js')
             add_stylesheet(req, 'CategorizedFields/css/base.css')
@@ -82,10 +79,10 @@ class CategorizedFields(Component):
                                 }
                             });
                             })(); 
-                        """ %  (json.dumps(self.categories, cls=categoryEncoder), 
-                                json.dumps(ticket.values, cls=DateTimeJSONEncoder),
-                                json.dumps(self.categories, cls=categoryEncoder), 
-                                json.dumps(ticket.values, cls=DateTimeJSONEncoder))))
+                        """ % (json.dumps(self.categories, cls=CategoryEncoder),
+                               json.dumps(ticket.values, cls=DateTimeJSONEncoder),
+                               json.dumps(self.categories, cls=CategoryEncoder),
+                               json.dumps(ticket.values, cls=DateTimeJSONEncoder))))
 
         return stream
 
@@ -205,143 +202,6 @@ class CategorizedFields(Component):
 
         return sorted(fields, key=foo)
 
-    def categorize_ticket_view(self, stream, ticket, view_buffer):
-
-        last_id = '//h1[@id="trac-ticket-title"]'
-
-        for category in self._sort_catagories(self.catagories):
-
-            if self.category_is_hidden(category, ticket):
-
-                continue
-
-            content = tag.table(class_='properties', style='border-top: none;')
-
-            if category.name == '_uncategorized':
-
-                wrapper = tag.div(content, id='cat__uncategorized', style='margin-bottom: 1em;')
-
-            else:
-
-                wrapper = tag.div(tag.h3(category.display_name), content,
-                                  id='cat_%s' % category.name, class_='description')
-
-            return_line = True
-            line_number = 1
-            last_line = StreamBuffer()
-
-            for field in self._sort_fields(category.fields):
-
-                if field == 'description' or field == 'summary':
-
-                    continue
-
-                if len(filter(lambda x: x['name'] == field, ticket.fields)) == 1:
-
-                    if self._get_field_size(ticket, field) == 'big':
-
-                        line_number += 1
-
-                        content.append(tag.tr(view_buffer[field], id='tr_%s_%s' % (category.name, str(line_number)), class_='fullrow'))
-
-                        line_number += 1
-                        return_line = True
-
-                    else:
-
-                        if return_line:
-
-                            line_number += 1
-
-                            last_line = tag.tr(view_buffer[field], id='tr_%s_%s' % (category.name, str(line_number)))
-
-                            content.append(last_line)
-
-                            return_line = False
-
-                        else:
-
-                            last_line.append(view_buffer[field])
-
-                            return_line = True
-
-            stream |= Transformer(last_id).after(wrapper)
-
-            last_id = '//div[@id="cat_%s"]' % category.name
-
-        return stream
-
-    def categorize_ticket_edit(self, stream, ticket, edit_buffer, edit_buffer2):
-
-        for category in self._sort_catagories(self.catagories):
-
-            if category.noedit:
-                continue
-
-            if category.name == '_uncategorized':
-
-                content = tag.table(id='edit_%s' % category.name, style='margin-bottom: 5px; table-layout: fixed;')
-                wrapper = content
-
-            else:
-
-                content = tag.table(id='edit_%s' % category.name, style='margin-bottom: 5px; table-layout: fixed;')
-
-                wrapper = tag.div(tag.div(category.display_name,
-                                          style='margin: 15px 5px 10px 5px; border-bottom: solid 1px darkgray; color: #999999;'),
-                                  content,
-                                  style="%s" % ('display: none;' if self.category_is_hidden(category, ticket) else ''))
-
-            return_line = True
-            line_number = 1
-
-            for field in self._sort_fields(category.fields):
-
-                if self.config.get('ticket-custom', field + '.noedit', "") == "true":
-                    continue
-
-                if len(filter(lambda x: x['name'] == field, ticket.fields)) == 1:
-
-                    if field == 'summary' or field == 'reporter' or self._get_field_size(ticket, field) == 'big':
-
-                        line_number += 1
-
-                        tr = tag.tr(tag.th(edit_buffer[field], class_='col1', id='label_' + field),
-                                    tag.td(tag.div(edit_buffer2[field], id='edit_' + field), class_='fullrow', colspan='3'),
-                                    id='edit_tr_%s_%s' % (category.name, str(line_number)))
-
-                        content.append(tr)
-
-                        line_number += 1
-                        return_line = True
-                        last_line = StreamBuffer()
-
-                    else:
-
-                        if return_line:
-
-                            line_number += 1
-
-                            last_line = tag.tr(tag.th(edit_buffer[field], class_='col1', id='label_' + field),
-                                        tag.td(tag.div(edit_buffer2[field], id='edit_' + field), class_='col1'),
-                                        id='edit_tr_%s_%s' % (category.name, str(line_number)))
-
-                            content.append(last_line)
-
-                            return_line = False
-
-                        else:
-
-                            last_line.append(tag.th(edit_buffer[field], class_='col2'))
-
-                            last_line.append(tag.td(edit_buffer2[field], class_='col2'))
-
-                            return_line = True
-
-            stream |= Transformer('//div[@id="modify"]/fieldset[@id="properties"]').append(wrapper)
-
-        return stream
-
 
 class Category(object):
 
@@ -358,9 +218,10 @@ class Category(object):
         return self.__dict__.iteritems()
 
 
-class categoryEncoder(json.JSONEncoder):
+class CategoryEncoder(json.JSONEncoder):
     def default(self, o):
         return o.__dict__
+
 
 class DateTimeJSONEncoder(json.JSONEncoder):
     def default(self, obj):
