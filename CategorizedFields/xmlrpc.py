@@ -21,9 +21,9 @@ class CategorizedFieldsRPC(Component):
         return 'catfields'
 
     def xmlrpc_methods(self):
-        yield 'WIKI_VIEW', ((dict,),), self.getCatagories
+        yield 'WIKI_VIEW', ((dict,),), self.getCategories
 
-    def getCatagories(self, req):
+    def getCategories(self, req):
 
         categories = {"_uncategorized": Category('_uncategorized', '')}
 
