@@ -1,0 +1,43 @@
+#ticket .fullrow td[colspan] {
+    width: 80%;
+}
+
+th.col1, th.col2 {
+    width: 20%;
+    text-align: left;
+}
+
+td.col1, td.col2 {
+    width: 30%;
+}
+
+#modify table {
+    width: 100%;
+}
+
+#modify .fullrow {
+    padding-right: 10%;
+}
+
+#modify1, #ticket1 {
+    display: none;
+}
+
+#cat__uncategorized {
+    margin-bottom: 1em;
+}
+
+#cat__uncategorized .properties {
+    border-top: none;
+}
+
+.edit_category {
+    margin-bottom: 5px;
+    table-layout: fixed;
+}
+
+.edit_category_header {
+    margin: 15px 5px 10px;
+    border-bottom: 1px solid darkgray;
+    color: rgb(153,153,153);
+}
