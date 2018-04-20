@@ -28,7 +28,7 @@
                     if (header.length > 0) {
                         this.headers[fieldName] = header;
                         this.fields[fieldName] = null;
-                        var field = this.element.find('#field-' + fieldName);
+                        var field = this.element.find('#field-' + fieldName).parent();
                         if (field.length > 0) {
                             this.fields[fieldName] = field;
                         }
@@ -85,7 +85,7 @@
                 return element ? element.parent().attr('class') : '';
             },
             getHtml: function (element) {
-                return element ? element.wrap('<p/>').parent().html() : '';
+                return element ? element.html() : '';
             }
         }
     }
