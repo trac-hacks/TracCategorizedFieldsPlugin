@@ -17,11 +17,12 @@ from setuptools import find_packages, setup
 setup(
     name='TracCategorizedFields', version='2.0',
     packages=find_packages(exclude=['*.tests*']),
-    license = "BSD 3-Clause",
+    license="BSD 3-Clause",
     author_email='cauliflower.kan@gmail.com',
     author='Cauly Kan',
-    package_data={ 'CategorizedFields': ['htdocs/js/*.js', 'htdocs/images/*.png', 'htdocs/css/*.css', 'templates/*.html'] },
-    entry_points = {
+    package_data={'CategorizedFields': ['htdocs/js/*.js', 'htdocs/js/dist/*.js',
+                                        'htdocs/images/*.png', 'htdocs/css/*.css', 'templates/*.html']},
+    entry_points={
         'trac.plugins': [
             'traccategorizedfields = CategorizedFields',
         ],

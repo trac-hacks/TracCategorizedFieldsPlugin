@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "vue": "^2.4.2",
-    "whatwg-fetch": "^2.0.3"
+    "vue": "^2.6.11",
+    "whatwg-fetch": "^2.0.4"
   },
   "devDependencies": {
-    "vue-loader": "^13.0.4",
-    "vue-template-compiler": "^2.4.2",
-    "webpack": "^3.5.5"
+    "vue-loader": "^14.2.2",
+    "vue-template-compiler": "^2.6.11",
+    "webpack": "^3.12.0"
   }
 }

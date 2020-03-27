@@ -14,10 +14,8 @@ Created on 2014-03-17
 '''
 from trac.core import Component, implements, TracError
 from trac.ticket import Ticket
-from trac.web.api import ITemplateStreamFilter
-from trac.web.chrome import ITemplateProvider, add_script, add_stylesheet
-from genshi.filters.transform import Transformer, StreamBuffer
-from genshi.builder import tag, Element
+from trac.web.api import IRequestFilter
+from trac.web.chrome import ITemplateProvider, add_script, add_stylesheet, add_script_data
 import time
 import json
 import datetime
@@ -25,7 +23,7 @@ import pkg_resources
 
 
 class CategorizedFields(Component):
-    implements(ITemplateStreamFilter, ITemplateProvider)
+    implements(ITemplateProvider, IRequestFilter)
 
     # ITemplateProvider methods
     def get_htdocs_dirs(self):
@@ -34,57 +32,87 @@ class CategorizedFields(Component):
     def get_templates_dirs(self):
         return []
 
+    # IRequestFilter
+    def pre_process_request(self, req, handler):
+        return handler
+
+    def post_process_request(self, req, template, data, content_type):
+        if template in ('ticket.html', 'ticket_preview.html'):
+            ticket = data.get('ticket')
+            if ticket and ticket.exists:
+                add_script(req, 'CategorizedFields/js/dist/bundle.js')
+                add_stylesheet(req, 'CategorizedFields/css/base.css')
+
+                self.categories = self.build_category()
+                self.map_fields_to_category(self.categories)
+
+                for index in list(self.categories.keys()):
+                    if self.category_is_hidden(self.categories[index], ticket):
+                        del self.categories[index]
+
+                add_script_data(req, categorizedFieldsData={
+                                'categories': json.dumps(self.categories, cls=CategoryEncoder),
+                                'ticket': json.dumps(ticket.values, cls=DateTimeJSONEncoder)})
+        return template, data, content_type
+
     # ITemplateStreamFilter
-    def filter_stream(self, req, method, filename, stream, data):
+    # def filter_stream(self, req, method, filename, stream, data):
 
-        if filename != "ticket.html" and filename != 'ticket_preview.html':
-            return stream
+    #     if filename != "ticket.html" and filename != 'ticket_preview.html':
+    #         return stream
 
-        if 'ticket' in data:
+    #     if 'ticket' in data:
 
-            add_script(req, 'CategorizedFields/js/bundle.js')
-            add_stylesheet(req, 'CategorizedFields/css/base.css')
+    #         add_script(req, 'CategorizedFields/js/bundle.js')
+    #         add_stylesheet(req, 'CategorizedFields/css/base.css')
 
-            ticket = data['ticket']
+    #         ticket = data['ticket']
 
-            self.categories = self.build_category()
-            self.map_fields_to_category(self.categories)
+    #         self.categories = self.build_category()
+    #         self.map_fields_to_category(self.categories)
 
-            for index in list(self.categories.keys()):
-                if self.category_is_hidden(self.categories[index], ticket):
-                    del self.categories[index]
+    #         for index in list(self.categories.keys()):
+    #             if self.category_is_hidden(self.categories[index], ticket):
+    #                 del self.categories[index]
 
-            cat_ticket = Element('cat-ticket', **{':categories': 'categories', ':ticket': 'ticket'})
-            cat_modify = Element('cat-modify', **{':categories': 'categories', ':ticket': 'ticket'})
-            
-            stream |= Transformer('//div[@id="ticket"]').attr("id", "ticket1")
-            stream |= Transformer('//div[@id="ticket1"]').after(tag.div(cat_ticket, id='ticket', class_='trac-content'))
-            stream |= Transformer('//fieldset[@id="properties"]').attr("id", "properties1")
-            stream |= Transformer('//fieldset[@id="properties1"]').after(tag.fieldset(cat_modify, id='properties'))
-            
-            stream |= Transformer('//body').append(tag.script("""
-                            (function () {
-                            var app1 = new Vue$({
-                                el: '#ticket',
-                                data: {
-                                    categories: %s,
-                                    ticket: %s,
-                                }
-                            });
-                            var app2 = new Vue$({
-                                el: '#properties',
-                                data: {
-                                    categories: %s,
-                                    ticket: %s,
-                                }
-                            });
-                            })(); 
-                        """ % (json.dumps(self.categories, cls=CategoryEncoder),
-                               json.dumps(ticket.values, cls=DateTimeJSONEncoder),
-                               json.dumps(self.categories, cls=CategoryEncoder),
-                               json.dumps(ticket.values, cls=DateTimeJSONEncoder))))
+    #         cat_ticket = Element(
+    #             'cat-ticket', **{':categories': 'categories', ':ticket': 'ticket'})
+    #         cat_modify = Element(
+    #             'cat-modify', **{':categories': 'categories', ':ticket': 'ticket'})
 
-        return stream
+    #         stream |= Transformer('//div[@id="ticket"]').attr("id", "ticket1")
+    #         stream |= Transformer(
+    #             '//div[@id="ticket1"]').after(tag.div(cat_ticket, id='ticket', class_='trac-content'))
+    #         stream |= Transformer(
+    #             '//fieldset[@id="properties"]').attr("id", "properties1")
+    #         stream |= Transformer(
+    #             '//fieldset[@id="properties1"]').after(tag.fieldset(cat_modify, id='properties'))
+
+    #         stream |= Transformer('//body').append(tag.script("""
+    #                         (function () {
+    #                         var app1 = new Vue$({
+    #                             el: '#ticket',
+    #                             data: {
+    #                                 categories: %s,
+    #                                 ticket: %s,
+    #                             }
+    #                         });
+    #                         var app2 = new Vue$({
+    #                             el: '#properties',
+    #                             data: {
+    #                                 categories: %s,
+    #                                 ticket: %s,
+    #                             }
+    #                         });
+    #                         })();
+    #                     """ % (json.dumps(self.categories, cls=CategoryEncoder),
+    #                            json.dumps(ticket.values,
+    #                                       cls=DateTimeJSONEncoder),
+    #                            json.dumps(self.categories,
+    #                                       cls=CategoryEncoder),
+    #                            json.dumps(ticket.values, cls=DateTimeJSONEncoder))))
+
+    #     return stream
 
     def build_category(self):
         '''
@@ -94,7 +122,7 @@ class CategorizedFields(Component):
             [catagroy-fields]
             cat1 = category1
             cat1.hide_when_type = bug
-            cat1.hide_when_status = new, closed 
+            cat1.hide_when_status = new, closed
         '''
 
         catagories = {"_uncategorized": Category('_uncategorized', '')}
@@ -143,7 +171,7 @@ class CategorizedFields(Component):
         categorized = []
 
         fields = ['reporter', 'summary', 'type', 'owner', 'priority', 'component', 'milestone', 'severity',
-                       'keywords', 'cc', 'description']
+                  'keywords', 'cc', 'description']
 
         for opt_name, opt_value in self.config.options('ticket-custom'):
 
@@ -180,7 +208,8 @@ class CategorizedFields(Component):
 
     def _get_field_size(self, ticket, field_name):
 
-        size = self.config.get('ticket-custom', '%s.display_size' % field_name, None)
+        size = self.config.get(
+            'ticket-custom', '%s.display_size' % field_name, None)
 
         if (size != None and size in ['big', 'small']):
 
@@ -205,7 +234,7 @@ class CategorizedFields(Component):
 
 class Category(object):
 
-    def __init__(self, name, display_name, noedit = False):
+    def __init__(self, name, display_name, noedit=False):
 
         self.name = name
         self.display_name = display_name

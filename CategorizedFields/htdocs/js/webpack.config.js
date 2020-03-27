@@ -4,8 +4,9 @@ module.exports = {
     ],
 
     output: {
-        filename: 'bundle.js',
+        filename: './bundle.js',
     },
+    mode: "development",
     module: {
         rules: [
             {
