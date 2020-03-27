@@ -41,3 +41,7 @@ td.col1, td.col2 {
     border-bottom: 1px solid darkgray;
     color: rgb(153,153,153);
 }
+
+#field-summary {
+    width: 80%;
+}

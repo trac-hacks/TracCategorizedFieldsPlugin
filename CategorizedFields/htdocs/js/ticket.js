@@ -15,7 +15,7 @@ $(document).ready(function () {
     $(".properties").attr("id", "ticket-properties1");
     $("#ticket-properties1").after($("<div id='ticket-properties'><table class='properties'><cat-ticket :categories='categories' :ticket='categories'></cat-ticket></table></div>"));
     $("#properties").attr("id", "properties1");
-    $("#properties1").after($("<fieldset id='properties'><cat-modify :categories='categories' :ticket='categories'></cat-modify></fieldset>"));
+    $("#properties1").after($("<div id='properties-wrapper'><cat-modify :categories='categories' :ticket='categories'></cat-modify></div>"));
 
     window.app1 = new Vue$({
         el: '#ticket-properties',
@@ -25,7 +25,7 @@ $(document).ready(function () {
         }
     });
     window.app2 = new Vue$({
-        el: '#properties',
+        el: '#properties-wrapper',
         data: {
             categories: cat,
             ticket: t,
