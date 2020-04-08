@@ -54,14 +54,19 @@ class CategorizedFields(Component):
                 if self.category_is_hidden(self.categories[index], ticket):
                     del self.categories[index]
 
-            cat_ticket = Element('cat-ticket', **{':categories': 'categories', ':ticket': 'ticket'})
-            cat_modify = Element('cat-modify', **{':categories': 'categories', ':ticket': 'ticket'})
-            
+            cat_ticket = Element(
+                'cat-ticket', **{':categories': 'categories', ':ticket': 'ticket'})
+            cat_modify = Element(
+                'cat-modify', **{':categories': 'categories', ':ticket': 'ticket'})
+
             stream |= Transformer('//div[@id="ticket"]').attr("id", "ticket1")
-            stream |= Transformer('//div[@id="ticket1"]').after(tag.div(cat_ticket, id='ticket', class_='trac-content'))
-            stream |= Transformer('//fieldset[@id="properties"]').attr("id", "properties1")
-            stream |= Transformer('//fieldset[@id="properties1"]').after(tag.fieldset(cat_modify, id='properties'))
-            
+            stream |= Transformer(
+                '//div[@id="ticket1"]').after(tag.div(cat_ticket, id='ticket', class_='trac-content'))
+            stream |= Transformer(
+                '//fieldset[@id="properties"]').attr("id", "properties1")
+            stream |= Transformer(
+                '//fieldset[@id="properties1"]').after(tag.fieldset(cat_modify, id='properties'))
+
             stream |= Transformer('//body').append(tag.script("""
                             (function () {
                             var app1 = new Vue$({
@@ -80,8 +85,10 @@ class CategorizedFields(Component):
                             });
                             })(); 
                         """ % (json.dumps(self.categories, cls=CategoryEncoder),
-                               json.dumps(ticket.values, cls=DateTimeJSONEncoder),
-                               json.dumps(self.categories, cls=CategoryEncoder),
+                               json.dumps(ticket.values,
+                                          cls=DateTimeJSONEncoder),
+                               json.dumps(self.categories,
+                                          cls=CategoryEncoder),
                                json.dumps(ticket.values, cls=DateTimeJSONEncoder))))
 
         return stream
@@ -114,7 +121,7 @@ class CategorizedFields(Component):
                 catagories[category_name].hide_condition.setdefault(hide_condition[len('hide_when_'):], []) \
                     .extend(filter(lambda x: x != '', opt_value.strip().split(',')))
 
-            elif opt_name.split('.')[-1] == 'index':
+            elif opt_name.split('.')[-1] == 'order':
 
                 category_name = opt_name.split('.')[0]
 
@@ -143,7 +150,7 @@ class CategorizedFields(Component):
         categorized = []
 
         fields = ['reporter', 'summary', 'type', 'owner', 'priority', 'component', 'milestone', 'severity',
-                       'keywords', 'cc', 'description']
+                  'keywords', 'cc', 'description']
 
         for opt_name, opt_value in self.config.options('ticket-custom'):
 
@@ -180,7 +187,8 @@ class CategorizedFields(Component):
 
     def _get_field_size(self, ticket, field_name):
 
-        size = self.config.get('ticket-custom', '%s.display_size' % field_name, None)
+        size = self.config.get(
+            'ticket-custom', '%s.display_size' % field_name, None)
 
         if (size != None and size in ['big', 'small']):
 
@@ -198,14 +206,14 @@ class CategorizedFields(Component):
 
         def foo(x):
 
-            return self.config.getint('ticket-custom', x + '.index', 0)
+            return self.config.getint('ticket-custom', x + '.order', 0)
 
         return sorted(fields, key=foo)
 
 
 class Category(object):
 
-    def __init__(self, name, display_name, noedit = False):
+    def __init__(self, name, display_name, noedit=False):
 
         self.name = name
         self.display_name = display_name
