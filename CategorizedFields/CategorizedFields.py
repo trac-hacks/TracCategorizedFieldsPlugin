@@ -142,7 +142,7 @@ class CategorizedFields(Component):
                 catagories[category_name].hide_condition.setdefault(hide_condition[len('hide_when_'):], []) \
                     .extend(filter(lambda x: x != '', opt_value.strip().split(',')))
 
-            elif opt_name.split('.')[-1] == 'index':
+            elif opt_name.split('.')[-1] == 'order':
 
                 category_name = opt_name.split('.')[0]
 
@@ -227,7 +227,7 @@ class CategorizedFields(Component):
 
         def foo(x):
 
-            return self.config.getint('ticket-custom', x + '.index', 0)
+            return self.config.getint('ticket-custom', x + '.order', 0)
 
         return sorted(fields, key=foo)
 
