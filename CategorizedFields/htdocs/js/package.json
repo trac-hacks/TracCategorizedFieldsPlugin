@@ -6,6 +6,6 @@
   "devDependencies": {
     "vue-loader": "^13.0.4",
     "vue-template-compiler": "^2.4.2",
-    "webpack": "^3.5.5"
+    "webpack": "^5.75.0"
   }
 }
