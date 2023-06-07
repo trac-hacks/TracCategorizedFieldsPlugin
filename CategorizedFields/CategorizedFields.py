@@ -23,7 +23,6 @@ import json
 import datetime
 import pkg_resources
 
-
 class CategorizedFields(Component):
     implements(ITemplateStreamFilter, ITemplateProvider)
 
@@ -41,7 +40,6 @@ class CategorizedFields(Component):
             return stream
 
         if 'ticket' in data:
-
             add_script(req, 'CategorizedFields/js/bundle.js')
             add_stylesheet(req, 'CategorizedFields/css/base.css')
 
@@ -95,50 +93,37 @@ class CategorizedFields(Component):
 
     def build_category(self):
         '''
-            build catagories from config
+            build categories from configuration
 
             e.g.
-            [catagroy-fields]
+            [category-fields]
             cat1 = category1
             cat1.hide_when_type = bug
             cat1.hide_when_status = new, closed 
         '''
 
         catagories = {"_uncategorized": Category('_uncategorized', '')}
-
         catagories['_uncategorized'].index = 0
 
         for opt_name, opt_value in self.config.options('categorized-fields'):
-
             if not '.' in opt_name:
-
                 catagories[opt_name] = Category(opt_name, opt_value)
-
             elif opt_name.split('.')[-1].startswith('hide_when_'):
-
                 category_name, hide_condition = opt_name.split('.')
-
                 catagories[category_name].hide_condition.setdefault(hide_condition[len('hide_when_'):], []) \
                     .extend(filter(lambda x: x != '', opt_value.strip().split(',')))
-
             elif opt_name.split('.')[-1] == 'order':
-
                 category_name = opt_name.split('.')[0]
-
                 catagories[category_name].index = int(opt_value)
-
             elif opt_name.split('.')[-1] == 'noedit':
-
                 category_name = opt_name.split('.')[0]
-
                 catagories[category_name].noedit = opt_value == 'true'
 
         return catagories
 
     def map_fields_to_category(self, catagories):
         '''
-            let's collect all custom fields and findout which fields do we have
-
+            collect all custom fields and find out which fields we have,
             something like:
 
             [ticket-custom]
@@ -155,21 +140,14 @@ class CategorizedFields(Component):
         for opt_name, opt_value in self.config.options('ticket-custom'):
 
             if not '.' in opt_name and not opt_name in fields:
-
                 fields.append(opt_name)
-
             elif opt_name.split('.')[-1] == 'category' and opt_value.strip() in catagories.keys():
-
                 if not opt_name.split('.')[0] in catagories[opt_value].fields:
-
                     catagories[opt_value].fields.append(opt_name.split('.')[0])
-
                 categorized.append(opt_name.split('.')[0])
 
         for item in self._sort_fields(fields):
-
             if not item in categorized and not item in catagories['_uncategorized'].fields:
-
                 catagories['_uncategorized'].fields.append(item)
 
     def category_is_hidden(self, category, ticket):
@@ -178,9 +156,7 @@ class CategorizedFields(Component):
             return False
 
         for cond, list in category.hide_condition.items():
-
             if len(filter(lambda x: x['name'] == cond, ticket.fields)) == 1 and ticket[cond] in list:
-
                 return True
 
         return False
@@ -191,21 +167,16 @@ class CategorizedFields(Component):
             'ticket-custom', '%s.display_size' % field_name, None)
 
         if (size != None and size in ['big', 'small']):
-
             return size
-
         else:
-
             return 'big' if filter(lambda x: x['name'] == field_name, ticket.fields)[0]['type'] == 'textarea' else 'small'
 
     def _sort_catagories(self, catagories):
-
         return sorted(catagories.values(), key=lambda x: x.index)
 
     def _sort_fields(self, fields):
 
         def foo(x):
-
             return self.config.getint('ticket-custom', x + '.order', 0)
 
         return sorted(fields, key=foo)
@@ -214,7 +185,6 @@ class CategorizedFields(Component):
 class Category(object):
 
     def __init__(self, name, display_name, noedit=False):
-
         self.name = name
         self.display_name = display_name
         self.hide_condition = {}
