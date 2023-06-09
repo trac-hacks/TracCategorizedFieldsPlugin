@@ -93,9 +93,8 @@ class CategorizedFields(Component):
 
     def build_category(self):
         '''
-            build categories from configuration
+            Build categories from configuration, for example:
 
-            e.g.
             [category-fields]
             cat1 = category1
             cat1.hide_when_type = bug
@@ -123,7 +122,7 @@ class CategorizedFields(Component):
 
     def map_fields_to_category(self, catagories):
         '''
-            collect all custom fields and find out which fields we have,
+            Collect all custom fields and find out which fields we have,
             something like:
 
             [ticket-custom]
