@@ -20,6 +20,10 @@ setup(
     license="BSD 3-Clause",
     author_email='cauliflower.kan@gmail.com',
     author='Cauly Kan',
+    classifiers=[
+            'Framework :: Trac',
+            'Programming Language :: Python :: 2.7',
+        ],
     package_data={ 'CategorizedFields': ['htdocs/js/*.js', 'htdocs/images/*.png', 'htdocs/css/*.css', 'templates/*.html'] },
     entry_points={
         'trac.plugins': [
